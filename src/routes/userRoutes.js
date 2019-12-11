@@ -1,34 +1,33 @@
-const User = require('../models/user');
+const mysql = require('mysql');
+
+const connection = mysql.createConnection({
+  host: 'remotemysql.com',
+  user: 'BCzMQnHKJo',
+  password: 'N9C1rfcDux',
+  database: 'BCzMQnHKJo',
+});
 
 module.exports = function (app) {
-  app.get('/users', (req, res) => {
-    User.getUsers((err, data) => {
-      res.status(200).json(data);
-    });
-  });
 
-  app.post('/users', (req, res) => {
-    const {
-      firstname, lastname, email, contraseña,
-    } = req.body;
-    const userData = {
-      firstname,
-      lastname,
-      email,
-      contraseña,
+  app.post('/user', async (req, res) => {
+    const { token } = req.body;
+    const usuario = await verify(token);
+    const userDB = {
+      name: usuario.nombre,
+      image: usuario.img,
+      email: usuario.email,
     };
 
-    User.inserUser(userData, (err, data) => {
-      if (data && data.insertId) {
-        res.status(200).json({
-          succes: true,
-          msg: 'Usuario insertado',
-          data,
-        });
+    console.log(userDB);
+
+    // eslint-disable-next-line consistent-return
+    connection.query('INSERT INTO users_aos SET ?', userDB, (err) => {
+      if (err) {
+        console.log(err);
       } else {
-        res.status(500).json({
-          succes: false,
-          msg: 'Error',
+        return res.status(200).json({
+          ok: true,
+          mensaje: 'Usuario registrado',
         });
       }
     });

@@ -1,17 +1,9 @@
-const mysql = require('mysql');
 
 // Google
 const { OAuth2Client } = require('google-auth-library');
 const { CLIENT_ID } = require('../config/config');
 
 const client = new OAuth2Client(CLIENT_ID);
-
-connection = mysql.createConnection({
-  host: 'remotemysql.com',
-  user: 'BCzMQnHKJo',
-  password: 'N9C1rfcDux',
-  database: 'BCzMQnHKJo',
-});
 
 async function verify(token) {
   const ticket = await client.verifyIdToken({
@@ -45,29 +37,6 @@ module.exports = function (app) {
       ok: true,
       mensaje: 'Ok',
       googleUser,
-    });
-  });
-
-  app.post('/user', async (req, res) => {
-    const { token } = req.body;
-    const usuario = await verify(token);
-    const userDB = {
-      name: usuario.nombre,
-      image: usuario.img,
-      email: usuario.email,
-    };
-
-    console.log(userDB);
-
-    connection.query('INSERT INTO users_aos SET ?', userDB, (err, response) => {
-      if (err) {
-        console.log(err);
-      } else {
-        return res.status(200).json({
-          ok: true,
-          mensaje: 'Usuario registrado',
-        });
-      }
     });
   });
 };
